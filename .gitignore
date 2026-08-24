@@ -1,0 +1,16 @@
+# Build output
+bin/
+obj/
+
+# The compiled plugin ships as a GitHub Release asset, not in the tree.
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store

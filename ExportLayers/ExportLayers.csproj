@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>ExportLayers</AssemblyName>
+    <RootNamespace>ExportLayersPlugin</RootNamespace>
+    <Version>1.0.0</Version>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Location of the Paint.NET installation whose assemblies we compile against. -->
+    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="$(PdnRoot)\PaintDotNet.Base.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.ComponentModel.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.Core.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.Effects.Core.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.Fundamentals.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.ObjectModel.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.Primitives.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.Windows.dll" Private="false" />
+    <Reference Include="$(PdnRoot)\PaintDotNet.Windows.Core.dll" Private="false" />
+  </ItemGroup>
+
+</Project>
