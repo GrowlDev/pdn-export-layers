@@ -47,8 +47,8 @@ namespace ExportLayersPlugin
         }
     }
 
-    // Deliberately knows nothing about Paint.NET. That is what lets the test harness push fake
-    // layers through exactly the same code the real thing runs.
+    // Deliberately knows nothing about Paint.NET, which means the export pipeline can be run
+    // and checked without it. Worth keeping that way.
     public sealed class SourceLayer
     {
         public string Name;

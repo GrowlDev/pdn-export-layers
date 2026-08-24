@@ -89,20 +89,6 @@ cd ExportLayers
 dotnet build -c Release
 ```
 
-## Tests
-
-A console harness that runs the export pipeline against fake in-memory layers, covering
-naming, duplicates, hidden layers, alpha roundtrip, stride handling and both overwrite
-modes. Nothing in it needs Paint.NET running.
-
-```
-cd ExportLayers.Tests
-dotnet run -c Release
-```
-
-It can also make and re-check `test-layers.pdn`, a small layered document for trying the
-plugin by hand: `dotnet run -c Release -- makepdn test-layers.pdn`, then `verifypdn`.
-
 ## Architecture notes
 
 - Classic `PaintDotNet.Effects.Effect` with a config dialog. In Paint.NET 5.x classic
@@ -126,4 +112,4 @@ plugin by hand: `dotnet run -c Release -- makepdn test-layers.pdn`, then `verify
 - After a successful export the dialog just closes (like Save); errors show a message
   box. Success feedback is the files themselves.
 
-MIT licensed. Source: `ExportLayers\` (plugin), `ExportLayers.Tests\` (harness).
+MIT licensed.
