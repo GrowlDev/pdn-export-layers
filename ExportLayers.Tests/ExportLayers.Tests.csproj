@@ -9,7 +9,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
     <RollForward>Major</RollForward>
-    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
+    <PdnRoot Condition="'$(PdnRoot)' == ''">C:\Program Files\paint.net</PdnRoot>
     <!-- The test-.pdn generator uses Paint.NET's Document.SaveToStream, which needs the
          BinaryFormatter compatibility package (same as Paint.NET itself ships). -->
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>

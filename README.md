@@ -74,9 +74,15 @@ startup. `uninstall-plugin.cmd` removes it again.
 
 ## Building from source
 
-Requires a .NET SDK able to target `net9.0-windows` (SDK 9 or 10) and a Paint.NET
-installation at `C:\Program Files\paint.net` (adjust `PdnRoot` in the `.csproj` files
-if yours differs — the projects compile against the installed Paint.NET assemblies).
+Requires a .NET SDK able to target `net9.0-windows` (SDK 9 or 10) and an installed
+Paint.NET — the projects compile against its assemblies rather than shipping their own.
+
+Defaults to `C:\Program Files\paint.net`. If yours is somewhere else, either set a
+`PdnRoot` environment variable or pass it on the command line:
+
+```
+dotnet build -c Release -p:PdnRoot="D:\paint.net"
+```
 
 ```
 cd ExportLayers
@@ -85,27 +91,17 @@ dotnet build -c Release
 
 ## Tests
 
-`ExportLayers.Tests` is a console harness that runs the export pipeline against fake
-in-memory layers (the pipeline is Paint.NET-independent by design; only a thin adapter
-touches Paint.NET's layer API). It verifies naming/sanitization, duplicate handling,
-hidden-layer behaviour, canvas-size preservation, exact alpha roundtrip, stride
-handling, and both overwrite modes:
+A console harness that runs the export pipeline against fake in-memory layers, covering
+naming, duplicates, hidden layers, alpha roundtrip, stride handling and both overwrite
+modes. Nothing in it needs Paint.NET running.
 
 ```
 cd ExportLayers.Tests
 dotnet run -c Release
 ```
 
-It can also generate/inspect a small layered test document using Paint.NET's own
-document classes:
-
-```
-dotnet run -c Release -- makepdn ..\test-layers.pdn
-dotnet run -c Release -- verifypdn ..\test-layers.pdn
-```
-
-`test-layers.pdn` (in the repo root) covers duplicate names, illegal characters,
-spaces, a hidden layer, partial-canvas content and semi-transparency.
+It can also make and re-check `test-layers.pdn`, a small layered document for trying the
+plugin by hand: `dotnet run -c Release -- makepdn test-layers.pdn`, then `verifypdn`.
 
 ## Architecture notes
 

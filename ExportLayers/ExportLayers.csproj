@@ -15,8 +15,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <!-- Wherever your paint.net lives. We build against the DLLs sitting in here. -->
-    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
+    <!-- Wherever your paint.net lives. We build against the DLLs sitting in here.
+         Override it with a PdnRoot environment variable or -p:PdnRoot=... -->
+    <PdnRoot Condition="'$(PdnRoot)' == ''">C:\Program Files\paint.net</PdnRoot>
   </PropertyGroup>
 
   <ItemGroup>

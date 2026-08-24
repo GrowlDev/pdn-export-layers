@@ -9,11 +9,18 @@ namespace ExportLayersTests
     {
         public static int Main(string[] args)
         {
+            // Same knob the .csproj files use, so one environment variable covers everything.
+            string pdnRoot = Environment.GetEnvironmentVariable("PdnRoot");
+            if (string.IsNullOrEmpty(pdnRoot))
+            {
+                pdnRoot = @"C:\Program Files\paint.net";
+            }
+
             // The PDN assemblies live in the install directory rather than next to this exe,
             // so the loader needs pointing at them by hand.
             AssemblyLoadContext.Default.Resolving += (ctx, name) =>
             {
-                string candidate = Path.Combine(@"C:\Program Files\paint.net", name.Name + ".dll");
+                string candidate = Path.Combine(pdnRoot, name.Name + ".dll");
                 return File.Exists(candidate) ? ctx.LoadFromAssemblyPath(candidate) : null;
             };
 
