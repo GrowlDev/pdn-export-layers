@@ -57,10 +57,12 @@ entry to the History. It never changes the image; undoing it does nothing.)
 
 ## Installation
 
-The compiled plugin is a single file: `ExportLayers\bin\Release\ExportLayers.dll`.
+Grab the zip from [Releases](https://github.com/GrowlDev/pdn-export-layers/releases).
+Or build it yourself (see below) — the compiled plugin is a single file,
+`ExportLayers\bin\Release\ExportLayers.dll`.
 
-Copy it to the per-user plugin folder (no admin needed — Paint.NET 5.x scans this
-automatically):
+Either way, copy `ExportLayers.dll` to the per-user plugin folder (no admin needed —
+Paint.NET 5.x scans this automatically):
 
 ```
 %USERPROFILE%\Documents\Paint.NET App Files\Effects\ExportLayers.dll
