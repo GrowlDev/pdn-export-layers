@@ -10,17 +10,16 @@ namespace ExportLayersPlugin
 {
     public sealed class ExportLayersConfigToken : EffectConfigToken
     {
-        /// <summary>Explicit destination folder; empty means "auto" (folder named after the .pdn file).</summary>
+        // Empty means "auto", i.e. a folder named after the .pdn.
         public string CustomFolder = string.Empty;
 
         public bool VisibleLayersOnly = false;
 
         public bool OverwriteExisting = true;
 
-        /// <summary>
-        /// Set once the user has confirmed an export. Makes "Repeat Effect" (Ctrl+F)
-        /// re-export silently with the same settings.
-        /// </summary>
+        // Only true once the user has actually pressed Export. This is the whole trick behind
+        // Ctrl+F: Paint.NET hangs onto a copy of the token, and a copy that comes back with
+        // this set means "you already know what to do, get on with it".
         public bool ExportRequested = false;
 
         public ExportLayersConfigToken()
@@ -42,29 +41,28 @@ namespace ExportLayersPlugin
         }
     }
 
-    /// <summary>
-    /// "Effects > Tools > Export Layers to PNGs..." — exports each layer of the document as a
-    /// canvas-sized PNG, named after the layer.
-    ///
-    /// The image itself is never modified (Render is an identity copy). The export runs in
-    /// exactly one of two places, never in the tiled Render callbacks:
-    ///  - from the config dialog's Export button (normal path), or
-    ///  - once per effect instance in OnSetRenderInfo when invoked without a dialog,
-    ///    i.e. "Repeat Effect" / Ctrl+F (silent re-export).
-    /// </summary>
+    /// <summary>Effects &gt; Tools &gt; Export Layers to PNGs...</summary>
+    // The thing to know before touching any of this: the export must not happen in Render().
+    // Render is called once per tile, on several threads, so doing the work there writes every
+    // layer a few dozen times and takes about as long as that sounds. Ask me how I know.
+    // So there are exactly two places it can happen:
+    //
+    //   - the dialog's Export button, which is the normal path, or
+    //   - OnSetRenderInfo, once, when there is no dialog. That one is Ctrl+F / Repeat Effect.
+    //
+    // The document itself is never touched. Render just copies the source straight through.
     [PluginSupportInfo(typeof(PluginSupportInfo))]
     public sealed class ExportLayersEffect : Effect
     {
         public const string StaticName = "Export Layers to PNGs";
 
-        // 0 = not yet exported by this effect instance; 1 = done. Guards against the apply-time
-        // OnSetRenderInfo call re-running an export the dialog already performed, and against
-        // any repeated OnSetRenderInfo calls within one invocation.
+        // 0 = this instance hasn't exported, 1 = it has. Both of the paths above can fire
+        // during a single invocation and I only ever want one set of files written.
         private int exportDone;
 
-        // True when this instance was invoked from the menu (a dialog will handle the export).
-        // False for "Repeat Effect", where no dialog is created and OnSetRenderInfo exports.
-        // Volatile: written on the UI thread, read from render worker threads.
+        // True if we came in from the menu, meaning a dialog exists and will do the exporting.
+        // False for Repeat Effect. volatile because the UI thread writes it and the render
+        // workers read it.
         private volatile bool dialogCreated;
 
         public ExportLayersEffect()
@@ -110,13 +108,17 @@ namespace ExportLayersPlugin
 
         public override void Render(EffectConfigToken parameters, RenderArgs dstArgs, RenderArgs srcArgs, Rectangle[] rois, int startIndex, int length)
         {
-            // The effect never changes the image; copy source through unchanged.
+            // Nothing to do here. We are only an "effect" because that is how you get a menu
+            // item and a config dialog out of Paint.NET.
+            // TODO: it's also why every export leaves a do-nothing entry in the History list.
+            // Haven't found a way round that yet without giving up the dialog.
             dstArgs.Surface.CopySurface(srcArgs.Surface, rois, startIndex, length);
         }
 
         private static Image CreateMenuIcon()
         {
-            // Small "stacked layers with an arrow" glyph, drawn in code so no resources are needed.
+            // Two stacked rectangles and a down arrow, drawn by hand so the plugin stays a
+            // single DLL with nothing embedded in it. It is not art.
             Bitmap icon = new Bitmap(16, 16, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(icon))
             {

@@ -9,7 +9,8 @@ namespace ExportLayersTests
     {
         public static int Main(string[] args)
         {
-            // The PDN assemblies live in the Paint.NET install directory, not next to this exe.
+            // The PDN assemblies live in the install directory rather than next to this exe,
+            // so the loader needs pointing at them by hand.
             AssemblyLoadContext.Default.Resolving += (ctx, name) =>
             {
                 string candidate = Path.Combine(@"C:\Program Files\paint.net", name.Name + ".dll");

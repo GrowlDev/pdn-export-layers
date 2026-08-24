@@ -4,12 +4,14 @@ using System.Windows.Forms;
 
 namespace ExportLayersPlugin
 {
-    /// <summary>
-    /// Finds the active document's .pdn file path by reflecting over Paint.NET's UI
-    /// (AppWorkspace.ActiveDocumentWorkspace.FilePath). The plugin API does not expose the
-    /// path, so this is best-effort: every failure returns null and callers fall back to
-    /// asking the user for a folder. Verified against Paint.NET 5.1.12.
-    /// </summary>
+    // Gets the open document's .pdn path, which the plugin API flatly refuses to tell you.
+    // I couldn't find a supported route to it, so this walks the open forms looking for
+    // AppWorkspace and then reflects its way down to ActiveDocumentWorkspace.FilePath.
+    //
+    // It's grubby, and it's the only reason "export into a folder next to the .pdn" works.
+    // Checked against 5.1.12. If a later version renames any of that we return null, the
+    // dialog asks for a folder the same way it already does for an unsaved document, and the
+    // plugin carries on being less convenient rather than broken.
     public static class DocumentPathFinder
     {
         public static string TryGetActiveDocumentPath()
@@ -21,8 +23,9 @@ namespace ExportLayersPlugin
                     string path;
                     if (form.InvokeRequired)
                     {
-                        // Marshal to the UI thread, but never block indefinitely: if the UI
-                        // thread is not pumping, give up and let the caller fall back.
+                        // Not a plain Invoke(): if the UI thread isn't pumping we'd sit here
+                        // forever. Five seconds is made up, but it is a very long time next to
+                        // how long this takes when it's going to work at all.
                         IAsyncResult asyncResult = form.BeginInvoke(new Func<Form, string>(TryGetPathFromForm), form);
                         if (!asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5)))
                         {
@@ -43,7 +46,8 @@ namespace ExportLayersPlugin
             }
             catch
             {
-                // Fall through: reflection into app internals must never break the export.
+                // We are rummaging around in someone else's internals, so assume anything in
+                // here can throw, and that none of it is worth killing the export over.
             }
             return null;
         }

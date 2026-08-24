@@ -10,6 +10,6 @@ namespace ExportLayersPlugin
         public string Author => "Tyson Young";
         public string Copyright => "MIT License";
         public Version Version => typeof(PluginSupportInfo).Assembly.GetName().Version;
-        public Uri WebsiteUri => new Uri("https://forums.getpaint.net/");
+        public Uri WebsiteUri => new Uri("https://github.com/GrowlDev/pdn-export-layers");
     }
 }

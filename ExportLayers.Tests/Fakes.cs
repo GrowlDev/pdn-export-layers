@@ -4,7 +4,7 @@ using ExportLayersPlugin;
 
 namespace ExportLayersTests
 {
-    /// <summary>A BGRA32 pixel buffer with configurable row stride (to exercise stride handling).</summary>
+    /// <summary>A BGRA32 buffer with a stride you can pad, so the copy path gets a real workout.</summary>
     public sealed class FakePixels
     {
         public readonly int Width;
@@ -29,7 +29,8 @@ namespace ExportLayersTests
             Data[i + 3] = a;
         }
 
-        /// <summary>Builds a SourceLayer whose OpenPixels pins this buffer until disposed.</summary>
+        // Pins the array for as long as the LockedPixels lives. Fine for a test; don't copy
+        // this pattern anywhere that matters.
         public SourceLayer ToLayer(string name, bool visible)
         {
             return new SourceLayer

@@ -10,7 +10,7 @@ using PaintDotNet.Rendering;
 
 namespace ExportLayersPlugin
 {
-    /// <summary>Thrown for expected, user-facing export problems (no destination, no layers, ...).</summary>
+    /// <summary>Problems the user should read as a sentence in a message box, not a stack trace.</summary>
     public sealed class ExportException : Exception
     {
         public ExportException(string message) : base(message) { }
@@ -24,7 +24,7 @@ namespace ExportLayersPlugin
         public int SkippedHidden;
     }
 
-    /// <summary>A BGRA32 pixel view of one layer, valid until disposed.</summary>
+    /// <summary>A BGRA32 view of one layer. Only valid until you dispose it, so don't hang onto it.</summary>
     public sealed class LockedPixels : IDisposable
     {
         private Action disposeAction;
@@ -47,7 +47,8 @@ namespace ExportLayersPlugin
         }
     }
 
-    /// <summary>One layer to export, decoupled from Paint.NET types so the pipeline is testable.</summary>
+    // Deliberately knows nothing about Paint.NET. That is what lets the test harness push fake
+    // layers through exactly the same code the real thing runs.
     public sealed class SourceLayer
     {
         public string Name;
@@ -57,10 +58,7 @@ namespace ExportLayersPlugin
 
     public static class LayerExporter
     {
-        /// <summary>
-        /// Exports the document's layers as canvas-sized straight-alpha 32-bit PNGs.
-        /// Runs at most once per call; safe on any thread.
-        /// </summary>
+        /// <summary>Pulls the layers out of the open document and hands them to ExportCore.</summary>
         public static ExportResult Export(IEffectEnvironment environment, ExportLayersConfigToken token)
         {
             if (environment == null)
@@ -101,7 +99,8 @@ namespace ExportLayersPlugin
             return ExportCore(size.Width, size.Height, layers, token);
         }
 
-        /// <summary>Paint.NET-independent export pipeline: naming, destination, PNG writing.</summary>
+        // The actual work: where the files go, what they end up called, writing them out.
+        // No Paint.NET types anywhere in here, which is on purpose. See SourceLayer.
         public static ExportResult ExportCore(int width, int height, IReadOnlyList<SourceLayer> layers, ExportLayersConfigToken token)
         {
             string folder = ResolveDestinationFolder(token);
@@ -136,10 +135,9 @@ namespace ExportLayersPlugin
             return result;
         }
 
-        /// <summary>
-        /// Where files will go: an explicit folder from the token wins; otherwise a folder named
-        /// after the .pdn file, next to it (resolved at export time so renames are followed).
-        /// </summary>
+        // An explicit folder wins; failing that it's a folder named after the .pdn, sitting
+        // next to it. Worked out fresh on every export rather than cached, so that saving the
+        // document somewhere else quietly takes the exports with it.
         public static string ResolveDestinationFolder(ExportLayersConfigToken token)
         {
             if (!string.IsNullOrWhiteSpace(token.CustomFolder))
@@ -162,7 +160,7 @@ namespace ExportLayersPlugin
             return autoFolder;
         }
 
-        /// <summary>Folder derived from the open document's file path, or null if unavailable.</summary>
+        /// <summary>Folder worked out from the document's path, or null if we couldn't get one.</summary>
         public static string TryGetAutoFolder()
         {
             string docPath = DocumentPathFinder.TryGetActiveDocumentPath();
@@ -200,6 +198,8 @@ namespace ExportLayersPlugin
                 {
                     unsafe
                     {
+                        // A row at a time, because the two strides don't have to match and for
+                        // odd widths they don't.
                         byte* srcBase = (byte*)src.Buffer;
                         byte* dstBase = (byte*)dstData.Scan0;
                         long rowBytes = (long)width * 4;
@@ -224,6 +224,8 @@ namespace ExportLayersPlugin
 
         // ---- naming ----
 
+        // Calling a layer "CON" is a perfectly reasonable thing to do, and Windows will still
+        // refuse to give you CON.png. Somehow all of this is still true.
         private static readonly HashSet<string> ReservedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "CON", "PRN", "AUX", "NUL",
@@ -250,7 +252,7 @@ namespace ExportLayersPlugin
                 }
             }
 
-            // Windows disallows trailing dots and spaces on file names.
+            // Trailing dots and spaces are out too, whatever Explorer lets you type.
             string cleaned = sb.ToString().TrimEnd('.', ' ');
 
             if (cleaned.Length == 0)
@@ -262,6 +264,8 @@ namespace ExportLayersPlugin
                 cleaned += "_";
             }
 
+            // 120 is a guess. It leaves room for a long folder path and a "_12" on the end
+            // without getting near MAX_PATH. Not properly correct, just comfortably under.
             if (cleaned.Length > 120)
             {
                 cleaned = cleaned.Substring(0, 120).TrimEnd('.', ' ');

@@ -108,7 +108,8 @@ namespace ExportLayersTests
             catch (ExportException) { threwRelative = true; }
             Check(threwRelative, "relative custom folder rejected");
 
-            // Outside Paint.NET there is no document path, so auto mode must fail cleanly.
+            // No Paint.NET here, so there's no document path, and auto mode has to fail politely
+            // instead of throwing something unreadable at the user.
             bool threwNoFolder = false;
             try { LayerExporter.ResolveDestinationFolder(Token("")); }
             catch (ExportException) { threwNoFolder = true; }

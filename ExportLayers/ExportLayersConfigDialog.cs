@@ -18,9 +18,9 @@ namespace ExportLayersPlugin
         private Button btnExport;
         private Button btnCancel;
 
-        // The computed "auto" destination (folder named after the .pdn file), or null if the
-        // document has never been saved. When the textbox still shows this value, the token
-        // keeps CustomFolder empty so future exports follow the document if it is renamed.
+        // The auto destination, or null if the document has never been saved. If the textbox
+        // still says exactly this, we leave CustomFolder empty rather than pinning the path --
+        // that way a later Save As takes the exports along with it.
         private string autoFolder;
 
         public ExportLayersConfigDialog()
@@ -238,9 +238,9 @@ namespace ExportLayersPlugin
             var token = (ExportLayersConfigToken)theEffectToken;
             token.ExportRequested = true;
 
-            // Push the token (with ExportRequested set) through the normal token-update path so
-            // the copy Paint.NET stores for "Repeat Effect" definitely carries the flag. The
-            // preview render this triggers does not export (the effect knows a dialog owns it).
+            // Push the token through the normal update path so the copy Paint.NET squirrels away
+            // for Repeat Effect definitely has the flag on it. This sets off a preview render,
+            // which does not export -- the effect knows a dialog owns it.
             FinishTokenUpdate();
 
             Cursor previousCursor = Cursor;
@@ -267,11 +267,11 @@ namespace ExportLayersPlugin
                 PluginSettings.SaveLastCustomFolder(token.CustomFolder);
             }
 
-            // The export already ran; make sure the apply-time OnSetRenderInfo does not run it again.
+            // Already done. Stop OnSetRenderInfo doing the whole lot again on apply.
             ((ExportLayersEffect)Effect).MarkExportDone();
 
-            // Close with OK so Paint.NET stores the token: Ctrl+F ("Repeat Effect") then
-            // re-exports silently with these settings.
+            // OK rather than Cancel, so the token actually gets stored. That is what makes
+            // Ctrl+F work later on.
             DialogResult = DialogResult.OK;
             Close();
         }

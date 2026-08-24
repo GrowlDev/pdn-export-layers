@@ -15,7 +15,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <!-- Location of the Paint.NET installation whose assemblies we compile against. -->
+    <!-- Wherever your paint.net lives. We build against the DLLs sitting in here. -->
     <PdnRoot>C:\Program Files\paint.net</PdnRoot>
   </PropertyGroup>
 

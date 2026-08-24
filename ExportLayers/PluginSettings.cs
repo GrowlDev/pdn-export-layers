@@ -3,10 +3,9 @@ using System.IO;
 
 namespace ExportLayersPlugin
 {
-    /// <summary>
-    /// Remembers the last explicitly chosen destination folder across sessions, used only as a
-    /// dialog prefill when the document has no file path. Stored under %APPDATA%\PdnExportLayers.
-    /// </summary>
+    // Remembers the last folder you picked by hand, purely so the dialog can prefill it for
+    // documents that have never been saved. Nothing depends on this working, which is why
+    // every failure below gets swallowed: a lost prefill is not worth an error message.
     internal static class PluginSettings
     {
         private static string SettingsFilePath => Path.Combine(
@@ -30,7 +29,7 @@ namespace ExportLayersPlugin
             }
             catch
             {
-                // Prefill convenience only; never let it break the dialog.
+                // See above.
             }
             return null;
         }
@@ -45,6 +44,7 @@ namespace ExportLayersPlugin
             }
             catch
             {
+                // And here.
             }
         }
     }
